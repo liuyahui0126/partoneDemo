@@ -1,0 +1,334 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>贪吃蛇</title>
+	<style type="text/css">
+	*{
+		padding: 0;
+		margin: 0;
+	}
+	table{
+		border-collapse: collapse;
+	}
+	tr,
+	td{
+		margin: 0;
+	}
+	td{
+		border:1px solid #000;
+		height: 20px;
+		width: 20px;
+		border-color: #ff9800;
+	}
+	.snake{
+		background: #66bb6a;
+	}
+	.food{
+		background: #fdd835;
+	}
+	#title{
+		background: #ffeb3b;
+		/*border:1px solid #000;*/
+		height: 74px;
+	}
+	#demo{
+		/*width: 600px;*/
+		text-align: center;
+		position: absolute;
+		left: 50%;
+		margin-left: -210px;
+	}
+	button{
+		border: 0;
+		background: #ffc107;
+		width: 60px;
+		margin-right: 5px;
+		height: 30px;
+		color: #fff;
+		margin-top: 16px;
+		disabled:true;
+	}
+	.gamename{
+		font-size: 16px;
+		color: #f40;
+	}
+	#score{
+		float: right;
+		width: 80px;
+		height: 50px;
+		border: 1px solid #fff;
+		margin-right: 6px;
+	}
+	#score p{
+		color: #2196f3;
+	}
+	#scoreTable{
+		text-align: center;
+		color: #fff;
+	}
+	</style>
+</head>
+<body>
+	<div id="demo">
+		<div id="title">
+			<p class="gamename">Snake Game</p>
+			<div id="navBar">
+				<!-- <button id="start">开始游戏</button> -->
+				<button id="primary">初级</button>
+				<button id="midium">中级</button>
+				<button id="senior">高级</button>
+				<button id="restart">重新开始</button>
+				<div id="score">
+					<p>Score</p>
+					<div id="scoreTable"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+	//定义变量
+	var line = 20; //行
+	var row = 20; //列
+	var oArray = [];
+	var SnakeX = [];
+	var SnakeY = [];
+	var FoodX;
+	var FoodY;
+	var timer = null;
+	var speed;
+	var currentDir; //记录蛇头方向
+	var score = 0;
+	//生成数组 Array和网格
+	function initGird(){
+		var otable = document.createElement('table');
+		var otbody = document.createElement('tbody');
+		for(var i = 0;i< line;i++){
+			var otr = document.createElement('tr');
+			for(var j = 0;j< row;j++){
+				var otd = document.createElement('td');
+				otr.appendChild(otd); 
+				oArray[i] = [];
+				oArray[i][j] = 0;
+				// console.log(oArray[i][j]);
+			}
+			otable.appendChild(otr);
+		}
+		otable.appendChild(otbody);
+		var odemo = document.getElementById('demo');
+		odemo.appendChild(otable);
+		// document.body.appendChild(otable);
+	}
+	//对蛇进行初始化
+	function initSnake(){
+		oArray[3][4] = 1;
+		SnakeX.unshift(3);
+		SnakeY.unshift(4);
+	}
+	//食物初始化
+	function initFood(){
+		var tempX = Math.floor(Math.random()*19);
+		var tempY = Math.floor(Math.random()*19);
+		if(oArray[tempX][tempY] == 1){
+			initFood();
+		}else{
+			FoodX = tempX;
+			FoodY = tempY;
+			oArray[FoodX][FoodY] = 2;
+		}
+	}
+
+	//渲染，改变css
+	function renderGird(){
+		for(var i = 0;i< line;i++){
+			for(var j = 0;j< row;j++){
+				var otr = document.getElementsByTagName('tr')[i];
+				var otd = otr.getElementsByTagName('td')[j];
+				if(oArray[i][j] == 1){
+					otd.className = 'snake';
+				}else if(oArray[i][j] == 2){
+					otd.className = 'food';
+				}else{
+					otd.classList.remove('snake');
+					otd.classList.remove('food');
+				}
+			}
+		}
+	}
+	//绑定事件 function bindEvent
+	function bindEvent(){
+		document.onkeydown = function (e){
+		switch (e.which){
+			//left
+			case 37:
+				if(currentDir != 'right'){
+					clearInterval(timer);
+					move('left');
+				}
+				break;
+			case 38: 
+				if(currentDir != 'bottom'){
+					clearInterval(timer);
+					move('top');
+				}
+				break;
+			case 39: 
+				if(currentDir != 'left'){
+					clearInterval(timer);
+					move('right');
+				}
+				break;
+			case 40:
+				if(currentDir != 'top'){
+					clearInterval(timer);
+					move('bottom');
+				}
+				break;
+			}
+		}
+	}
+	//移动
+	function move(dir){
+		timer = setInterval(function(){
+			if(dir == 'left'){
+				currentDir = 'left';
+				var x = SnakeX[0];
+				var y= SnakeY[0]-1;
+			}
+			if(dir == 'top'){
+				currentDir = 'top';
+				var x = SnakeX[0]-1;
+				var y = SnakeY[0];
+			}
+			if(dir == 'right'){
+				currentDir = 'right';
+				var x = SnakeX[0];
+				var y = SnakeY[0]+1;
+			}
+			if(dir == 'bottom'){
+				currentDir = 'bottom';
+				var x = SnakeX[0]+1;
+				var y = SnakeY[0];
+			}
+			SnakeX.unshift(x);
+			SnakeY.unshift(y);
+			if(!isEat()){
+				SnakeX.pop();
+				SnakeY.pop();
+			}else{
+				initFood();
+			}
+			if(isBang()||eatSelf()){
+				clearInterval(timer);
+				document.onkeydown = null;
+				alert('game over');
+				window.location.reload();
+				return;
+			}
+			changeArray();
+			renderGird();
+		},speed);
+	}
+	//改变标志位 1->0 0->1
+	function changeArray(){
+		for (var i = 0; i < line; i ++) {
+			for (var j = 0; j < row; j ++) {
+				if(oArray[i][j] == 2){
+				}else{
+					oArray[i][j] = 0;
+				}
+			}
+		}
+		for(var i = 0;i< SnakeY.length;i++){
+			oArray[SnakeX[i]][SnakeY[i]] = 1; 
+		}
+	}
+	//dealEat
+	function isEat(){
+		if(SnakeX[0]==FoodX && SnakeY[0]==FoodY){
+			score += 5;
+			scoreTable.innerText = score;
+			return true;
+		}else{
+			return false;
+		}
+	}
+	//dealDie
+	function isBang(){
+		if(SnakeX[0]>19 || SnakeX[0] < 0 ||SnakeY[0]>19 || SnakeY[0]<0){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	//eatSelf
+	function eatSelf(){
+		if(oArray[SnakeX[0]][SnakeY[0]] == 1){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	//开始游戏
+	function starGame(){
+		initGird();//生成网格
+		initSnake();//生成蛇
+		initFood();//生成食物
+		renderGird();//渲染
+		scoreTable.innerText = score;
+		var flag = true;
+		//初级
+		primary.onclick = function(){
+			document.getElementById("midium").disabled = true;
+			document.getElementById("senior").disabled = true;
+			speed = 600;
+			if(flag){
+				bindEvent();
+				primary.innerText = '暂停';
+				flag = false;
+			}else{
+				document.onkeydown = null;
+				clearInterval(timer);
+				primary.innerText = '继续';
+				flag = true;
+			}
+		}
+		//中级
+		midium.onclick = function(){
+			document.getElementById("primary").disabled = true;
+			document.getElementById("senior").disabled = true;
+			speed = 250;
+			if(flag){
+				bindEvent();
+				midium.innerText = '暂停';
+				flag = false;
+			}else{
+				document.onkeydown = null;
+				clearInterval(timer);
+				midium.innerText = '继续';
+				flag = true;
+			}
+		}
+		//高级
+		senior.onclick = function(){
+			document.getElementById("primary").disabled = true;
+			document.getElementById("midium").disabled = true;
+			speed = 150;
+			if(flag){
+				bindEvent();
+				senior.innerText = '暂停';
+				flag = false;
+			}else{
+				document.onkeydown = null;
+				clearInterval(timer);
+				senior.innerText = '继续';
+				flag = true;
+			}
+		}
+		restart.onclick = function(){
+			window.location.reload();
+		}
+	}
+	starGame();
+	</script>
+</body>
+</html>

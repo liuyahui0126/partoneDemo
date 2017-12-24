@@ -1,0 +1,102 @@
+<html lang="en">
+<head>
+	<meta chasrset="UTF-8">
+	<title>扫雷</title>
+	<style type="text/css">
+	*{
+		padding: 0;
+		margin: 0;
+	}
+	table{
+		border-collapse: collapse;
+	}
+	tr{
+		border:1px solid #000;
+		margin: 0;
+	}
+	td{
+		border:1px solid #000;
+		width: 20px;
+		height: 20px;
+		margin: 0;
+	}
+	button{
+		width: 20px;
+		height: 20px;
+	}
+	.null{
+		color: transparent;
+	}
+	.thunder{
+		color: red;
+	}
+	</style>
+</head>
+<body>
+	<script type="text/javascript">
+	var line = 20; //行
+	var row = 20;  //列
+	var oArray = [];   //标志位
+	var myButton = [];
+	var ThunderX = [];
+	var ThunderY = [];
+	var thunderNum = 10;
+	var buttonNum = line*row;
+	function createGrid(){
+		var otable = document.createElement('table');
+		var otbody = document.createElement('tbody');
+		for(var i = 0;i< line;i++){
+			var otr = document.createElement('tr');
+			for(var j = 0;j< row;j++){
+				var otd = document.createElement('td');
+				var obutton = document.createElement('button');
+				otd.appendChild(obutton);
+				otr.appendChild(otd);
+				oArray[i] = [];
+				oArray[i][j] = 0;
+				myButton[i] = [];
+				myButton[i][j] = 0;
+			}
+			otbody.appendChild(otr);
+		}
+		otable.appendChild(otbody);
+		document.body.appendChild(otable);
+	}
+	//创建雷
+	function createThunder(){
+		for(var i = 0;i< thunderNum; i++){
+			ThunderX[i] = Math.floor(Math.random()*19);
+			ThunderY[i] = Math.floor(Math.random()*19);
+			oArray[ThunderX[i]][ThunderY[i]] = 2;
+		}
+	}
+	//设置css样式
+	// function bindEvent(){
+	// 	for(var i = 0;i< 400;i++){
+	// 		var obutton = document.getElementsByTagName('button')[i];
+	// 		obutton.onclick = function(){
+	// 			for(var i = 0; i< line; i++){
+	// 				for(var j = 0;j< row;j++){
+	// 					var otr = document.getElementsByTagName('tr')[i];
+	// 					var otd = otr.getElementsByTagName('td')[j];
+	// 					if(oArray[i][j] == 2){
+	// 					otd.className = 'thunder';
+	// 					otd.innerText   = '*';
+	// 					}else{
+	// 						otd.classList.remove('thunder');
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
+
+	function bindEvent(){
+	}
+
+	createGrid();
+	createThunder();
+	bindEvent();
+	</script>
+</body>
+</html>
